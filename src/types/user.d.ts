@@ -1,6 +1,6 @@
 import { Department } from './enums'
 
-type User = {
+type TUser = {
 	id: string
 	avatarUrl: string
 	firstName: string
@@ -12,8 +12,8 @@ type User = {
 	phone: string
 }
 
-type UsersResponse = {
+type TUsersResponse = {
 	items: User[]
 }
 
-export { User, UsersResponse }
+export { TUser, TUsersResponse }

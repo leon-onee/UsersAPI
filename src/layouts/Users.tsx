@@ -1,57 +1,43 @@
-import { User } from '../types/user'
+import Error from '../components/Error'
+import User from '../components/User/User'
+import UserSkeleton from '../components/User/UserSkeleton'
+import useUsers from '../hooks/useUsers'
+import useSearchStore from '../store/searchStore'
+import { TUser } from '../types/user'
 
-type UsersProps = {
-	users: User[]
-	isLoading: boolean
-	isError: boolean
-}
-
-const Users: React.FC<UsersProps> = ({ users, isLoading, isError }) => {
-	if (isLoading) {
-		return <h2>Идет загрузка...</h2>
-	}
+const Users: React.FC = () => {
+	const search = useSearchStore(state => state.search)
+	const { data: users = [], isLoading, isError, refetch } = useUsers()
 
 	if (isError) {
-		return <h2>Ошибка</h2>
+		return <Error refetch={refetch} />
 	}
 
-	if (!users) {
-		return <h2>Нет данных</h2>
+	if (!isLoading && users.length === 0) {
+		return (
+			<div className='mt-4 grid gap-3'>
+				<h2>Нет данных</h2>
+			</div>
+		)
 	}
 
-	//TODO
-	// skeleton
+	const filteredUsers = search
+		? users.filter(user =>
+				[user.firstName, user.lastName, user.phone, user.userTag].some(field =>
+					field.toLowerCase().includes(search.toLowerCase())
+				)
+		  )
+		: users
 
 	return (
 		<div className='mt-4 grid gap-3'>
-			{users.length > 0
-				? users.map(user => (
-						<div key={user.id} className='flex gap-4 items-center'>
-							<div className='w-[72px] h-[72px] rounded-full overflow-hidden'>
-								<img
-									className='w-full h-full object-cover'
-									src={user.avatarUrl}
-									alt=''
-									onError={({ currentTarget }) => {
-										currentTarget.onerror = null // prevents looping
-										currentTarget.src = './src/assets/notfound.png'
-									}}
-								/>
-							</div>
-							<div>
-								<div className='text-[#050510] text-base font-medium'>
-									{user.firstName} {user.lastName}{' '}
-									<span className='font-normal text-sm text-[#97979B]'>
-										{user.userTag}
-									</span>
-								</div>
-								<div className='text-sm font-normal text-[#55555C]'>
-									{user.position}
-								</div>
-							</div>
-						</div>
-				  ))
-				: 'Увы'}
+			{isLoading &&
+				Array(10)
+					.fill(null)
+					.map((_, index) => <UserSkeleton key={index} />)}
+
+			{!isLoading &&
+				filteredUsers.map((user: TUser) => <User user={user} key={user.id} />)}
 		</div>
 	)
 }

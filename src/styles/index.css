@@ -11,5 +11,8 @@
   }
 	#root {
 		text-align: initial;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
 	}
 }
